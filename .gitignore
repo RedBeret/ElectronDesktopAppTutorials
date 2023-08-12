@@ -1,5 +1,28 @@
-videoinfo/node_modules/
-videoinfo/dist/
-videoinfo/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework
-node_modules
+# Node specific
+node_modules/
+*.log
+
+# OS specific
 .DS_Store
+Thumbs.db
+
+# Electron specific
+*/dist/
+*/node_modules/electron/dist/
+
+# ESlint & Prettier configurations
+**/.eslintrc
+**/.eslintrc.js
+**/.eslintrc.json
+**/.eslintrc.yml
+**/.eslintrc.yaml
+**/.prettierrc
+**/.prettierrc.js
+**/.prettierrc.json
+**/.prettierrc.yml
+**/.prettierrc.yaml
+**/.eslintignore
+**/.prettierignore
+
+# Ignore all node_modules inside projects
+**/node_modules/
