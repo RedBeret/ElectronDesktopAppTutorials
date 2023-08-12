@@ -6,7 +6,8 @@ A simple Electron application to fetch video duration information.
 1. **Clone the Repository**:
    ```bash
    git clone https://github.com/RedBeret/ElectronDesktopAppTutorials
-   cd videoinfo
+   cd ElectronDesktopAppTutorials/videoinfo
+
    ```
 
 2. **Install Dependencies**:
