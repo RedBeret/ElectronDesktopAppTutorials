@@ -1,0 +1,5 @@
+videoinfo/node_modules/
+videoinfo/dist/
+videoinfo/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework
+node_modules
+.DS_Store
