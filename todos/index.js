@@ -1,26 +1,22 @@
-// Import necessary modules from the Electron library
+// Importing required modules from Electron
 const electron = require('electron');
 const { app, BrowserWindow, Menu, ipcMain } = electron;
 
 let mainWindow;
 let addWindow;
 
-// When the Electron application is ready
+// App is ready to start
 app.on('ready', () => {
-    console.log('App is ready');
-    
-    // Create the main application window
+    // Creating the main BrowserWindow
     mainWindow = new BrowserWindow({});
     mainWindow.loadURL(`file://${__dirname}/main.html`);
-    
-    // Ensure the entire app quits when the main window is closed
-    mainWindow.on('closed', () => app.quit());
-    console.log('Loaded main.html');
 
-    // Create the application menu from the template defined below
+    // If main window is closed, quit the app
+    mainWindow.on('closed', () => app.quit());
+
+    // Setting up the application menu from the menu template
     const mainMenu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(mainMenu);
-    console.log('Menu set');
 });
 
 // Function to create the 'Add Todo' window
@@ -31,29 +27,46 @@ function createAddWindow() {
         title: 'Add New Todo'
     });
     addWindow.loadURL(`file://${__dirname}/add.html`);
-    
-    // Ensure the addWindow variable is set to null when the window is closed
     addWindow.on('closed', () => addWindow = null);
 }
 
-// Listen for 'todo:add' events from the renderer process (add.html)
+// Listening for the 'todo:add' event from renderer process
 ipcMain.on('todo:add', (event, todo) => {
-    console.log("Received todo:add in main process.");
-    
-    // Forward the todo item to the main window to be displayed
+    // Sending the todo item to the main window
     mainWindow.webContents.send('todo:add', todo);
-    
-    // Close the 'Add Todo' window
+    // Close the 'Add Todo' window after adding a todo
     addWindow.close();
 });
 
-const menuTemplate = [];
+// Menu template for the application
+const menuTemplate = [
+    // Common File menu
+    {
+        label: 'File',
+        submenu: [
+            {
+                label: 'New Todo',
+                click() {
+                    // Creating the 'Add Todo' window on click
+                    createAddWindow();
+                }
+            },
+            {
+                label: 'Quit',
+                accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q',
+                click() {
+                    // Quitting the app
+                    app.quit();
+                }
+            }
+        ]
+    }
+];
 
-// Check if the application is running on a Mac
-// If so, add an initial menu item for the app name
+// If the app is running on macOS, ensure the app menu displays correctly
 if (process.platform === 'darwin') {
     menuTemplate.unshift({
-        label: app.name,  // This will display the app's name
+        label: app.name,
         submenu: [
             { role: 'about' },
             { type: 'separator' },
@@ -62,19 +75,7 @@ if (process.platform === 'darwin') {
     });
 }
 
-// Add the 'File' menu with options to create a new todo and quit the application
-menuTemplate.push({
-    label: 'File',
-    submenu: [
-        { label: 'New Todo', click: createAddWindow },
-        { label: 'Quit', 
-            accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q',
-            click: app.quit 
-        }
-    ]
-});
-
-// If the application is not in production, add a 'View' menu for development tools
+// If not in production, add developer tools options
 if (process.env.NODE_ENV !== 'production') {
     menuTemplate.push({
         label: 'View',
@@ -84,9 +85,8 @@ if (process.env.NODE_ENV !== 'production') {
                 label: 'Toggle Developer Tools',
                 accelerator: process.platform === 'darwin' ? 'Command+Alt+I' : 'Ctrl+Shift+I',
                 click(item, focusedWindow) {
-                    if (focusedWindow) {
-                        focusedWindow.webContents.toggleDevTools();
-                    }
+                    // Toggle the developer tools for the focused window
+                    focusedWindow.toggleDevTools();
                 }
             }
         ]

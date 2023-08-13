@@ -1,45 +1,42 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <!-- Basic structure of the HTML document. No additional metadata or styles included -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Todo</title>
 </head>
-
 <body>
-    <!-- Form structure to accept a todo from user -->
+    <!-- Form to add a new todo -->
     <form>
         <div>
-            <!-- Label describing what the input field is for -->
             <label>Enter your todo</label>
-            <!-- Input field to accept user's todo. autofocus ensures that this input field is automatically focused when the page loads -->
-            <input autofocus />
+            <!-- Input field to type in the todo -->
+            <input type="text" autofocus />
         </div>
-        <!-- Submit button for the form -->
+        <!-- Submit button to add the new todo -->
         <button type="submit">Add</button>
     </form>
 
-    <!-- Script to manage the behavior when the form is submitted -->
     <script>
-        // Importing necessary modules from Electron library
+        // Importing required modules from Electron
         const electron = require('electron');
-        const { ipcRenderer } = electron; // ipcRenderer is used to communicate asynchronously from a renderer process to the main process
+        const { ipcRenderer } = electron;
 
-        // Adding an event listener to the form to detect when it's submitted
+        // Adding an event listener to the form's submit event
         document.querySelector('form').addEventListener('submit', (event) => {
-            // Prevent the form's default submission behavior, which is to refresh the page
+            // Preventing the default form submission behavior
             event.preventDefault();
 
-            // Extract the value (the text) entered by the user in the input field
+            // Retrieving the value entered in the input field
             const { value } = document.querySelector('input');
 
-            // Using Electron's ipcRenderer to send the entered todo to the main process
-            // The 'todo:add' is an identifier to tell the main process which action should be taken
+            // Sending the entered value to the main process using IPC
             ipcRenderer.send('todo:add', value);
 
-            // Logging to console to provide a visual feedback on the action performed
+            // Logging to the console for debugging purposes
             console.log(`Sent todo: ${value}`);
         });
     </script>
 </body>
-
 </html>
