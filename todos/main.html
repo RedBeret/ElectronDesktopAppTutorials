@@ -1,7 +1,45 @@
-<head>
+<!DOCTYPE html>
+<html>
 
+<head>
+    <!-- Basic structure of the HTML document. No additional metadata or styles included -->
 </head>
 
 <body>
-    <h1>My Todo</h1>
+    <!-- Title of the application -->
+    <h1>My Todos</h1>
+    <!-- Unordered list to display todos -->
+    <ul></ul>
+
+    <!-- Script to manage how todos are displayed and cleared -->
+    <script>
+        // Importing necessary modules from Electron library
+        const electron = require('electron');
+        // ipcRenderer is used to communicate asynchronously from a renderer process to the main process
+        const { ipcRenderer } = electron;
+
+        // Target the <ul> element in the DOM where todos will be displayed
+        const list = document.querySelector('ul');
+
+        // Set up an event listener for the 'todo:add' message from the main process
+        // When this message is received, the provided todo is added to the <ul> as a new list item
+        ipcRenderer.on('todo:add', (event, todo) => {
+            // Create a new <li> (list item) element
+            const li = document.createElement('li');
+            // Create a text node with the content of the todo
+            const text = document.createTextNode(todo);
+            // Append the text node to the <li>
+            li.appendChild(text);
+            // Append the <li> to the <ul>
+            list.appendChild(li);
+        });
+
+        // Set up another event listener for the 'todo:clear' message from the main process
+        // When this message is received, all todos in the <ul> are cleared
+        ipcRenderer.on('todo:clear', () => {
+            list.innerHTML = '';  // Clear the content of the <ul>
+        });
+    </script>
 </body>
+
+</html>

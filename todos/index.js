@@ -1,85 +1,94 @@
+// Import necessary modules from the Electron library
 const electron = require('electron');
-
-const { app, BrowserWindow, Menu } = electron;
+const { app, BrowserWindow, Menu, ipcMain } = electron;
 
 let mainWindow;
+let addWindow;
 
+// When the Electron application is ready
 app.on('ready', () => {
-        console.log('App is ready');
+    console.log('App is ready');
+    
+    // Create the main application window
     mainWindow = new BrowserWindow({});
     mainWindow.loadURL(`file://${__dirname}/main.html`);
+    
+    // Ensure the entire app quits when the main window is closed
     mainWindow.on('closed', () => app.quit());
     console.log('Loaded main.html');
 
-
-    const mainMenu = Menu.buildFromTemplate(menuTemplate)
+    // Create the application menu from the template defined below
+    const mainMenu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(mainMenu);
-        console.log('Menu set');
-
+    console.log('Menu set');
 });
 
-function createAddWindow () {
-    addWindow = new BrowserWindow ({
+// Function to create the 'Add Todo' window
+function createAddWindow() {
+    addWindow = new BrowserWindow({
         width: 300,
         height: 200,
         title: 'Add New Todo'
     });
-addWindow.loadURL(`file://${__dirname}/add.html`);
+    addWindow.loadURL(`file://${__dirname}/add.html`);
+    
+    // Ensure the addWindow variable is set to null when the window is closed
+    addWindow.on('closed', () => addWindow = null);
 }
 
+// Listen for 'todo:add' events from the renderer process (add.html)
+ipcMain.on('todo:add', (event, todo) => {
+    console.log("Received todo:add in main process.");
+    
+    // Forward the todo item to the main window to be displayed
+    mainWindow.webContents.send('todo:add', todo);
+    
+    // Close the 'Add Todo' window
+    addWindow.close();
+});
 
-const menuTemplate = [
+const menuTemplate = [];
 
-    {
-        label: 'File',
-        submenu: [
-            { label:'New Todo', 
-            click() {createAddWindow();} 
-            },
-            { label: 'Quit', 
-                accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q', /* accelerator replaced the below command they are = to each other */
-                       /* old command not optimized    
-                (() => { return              
-                    if (process.platform === 'darwin') {
-                        return 'Command+Q'
-                    } else { 
-                        return 'Ctrl+Q'; 
-                        
-                        (process.platform === 'win32') {}
-                })(), }*/
-                click(){
-                    app.quit(); 
-                },
-            }
-        ]
-    }
-];  
-
-if (process.platform === 'win32') {
+// Check if the application is running on a Mac
+// If so, add an initial menu item for the app name
+if (process.platform === 'darwin') {
     menuTemplate.unshift({
-    label: electron.app.name,
+        label: app.name,  // This will display the app's name
+        submenu: [
+            { role: 'about' },
+            { type: 'separator' },
+            { role: 'quit' }
+        ]
+    });
+}
+
+// Add the 'File' menu with options to create a new todo and quit the application
+menuTemplate.push({
+    label: 'File',
     submenu: [
-        { role: 'about' },
-        { type: 'separator' },
-        { role: 'services' },
-        { type: 'separator' },
-        { role: 'hide' },
-        { role: 'hideothers' },
-        { role: 'unhide' },
-        { type: 'separator' },
-        { role: 'quit' }
+        { label: 'New Todo', click: createAddWindow },
+        { label: 'Quit', 
+            accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q',
+            click: app.quit 
+        }
     ]
 });
-}
+
+// If the application is not in production, add a 'View' menu for development tools
 if (process.env.NODE_ENV !== 'production') {
     menuTemplate.push({
-        label: 'View'
+        label: 'View',
         submenu: [
+            { role: 'reload' },
             {
                 label: 'Toggle Developer Tools',
-                click(item, focusWindow) {
-                    
+                accelerator: process.platform === 'darwin' ? 'Command+Alt+I' : 'Ctrl+Shift+I',
+                click(item, focusedWindow) {
+                    if (focusedWindow) {
+                        focusedWindow.webContents.toggleDevTools();
+                    }
                 }
             }
-    })
+        ]
+    });
 }
